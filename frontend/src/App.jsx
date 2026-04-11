@@ -101,7 +101,7 @@ function App() {
                 disabled={loading}
                 className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-all disabled:opacity-50"
               >
-                {loading ? '🤖 AI Analyzing...' : '🚀 Submit Application'}
+                {loading ? 'AI Analyzing...' : 'Submit Application'}
               </button>
             </form>
           </div>

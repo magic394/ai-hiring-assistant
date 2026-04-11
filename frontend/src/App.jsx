@@ -19,19 +19,17 @@ function App() {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          body: formData
-        })
+        body: JSON.stringify(formData)
       });
       
       if (response.ok) {
-        toast.success('✅ Application submitted! Check your email.');
+        toast.success('Application submitted! Check your email.');
         setFormData({ name: '', email: '', resume_url: '' });
       } else {
-        toast.error('❌ Submission failed. Please try again.');
+        toast.error('Submission failed. Please try again.');
       }
     } catch (error) {
-      toast.error('❌ Submission failed. Please try again.');
+      toast.error('Submission failed. Please try again.');
       console.error(error);
     } finally {
       setLoading(false);

@@ -1,0 +1,13 @@
+# frontend/cloudflare.toml
+name = "ai-hiring-assistant"
+main = "./dist"
+routes = [
+  { pattern = "/*", zone_id = "" }
+]
+
+[build]
+command = "npm run build"
+directory = "dist"
+
+[env.production]
+VITE_API_URL = "https://your-n8n-worker.workers.dev"

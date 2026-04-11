@@ -1,0 +1,120 @@
+{
+  "name": "AI Hiring Assistant - Complete Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "candidate-submission",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "extract",
+        "fileProperty": "binaryData",
+        "dataPropertyName": "extractedText"
+      },
+      "name": "Extract PDF Text",
+      "type": "n8n-nodes-base.readPDF",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.extractedText }}",
+        "options": {}
+      },
+      "name": "Clean Text",
+      "type": "n8n-nodes-base.textProcessor",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-3.5-turbo",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an expert HR analyst. Analyze the candidate resume and return STRICT JSON with: score (0-100), role_fit (string), summary (short paragraph), strengths (array of 3-5 items), weaknesses (array of 2-3 items), recommended_action (shortlist/reject), interview_questions (array of 5 tailored questions)."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.cleanedText }}"
+            }
+          ]
+        },
+        "responseFormat": "json_object"
+      },
+      "name": "OpenAI Analysis",
+      "type": "n8n-nodes-base.openAi",
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.score }}",
+              "operation": "larger",
+              "value2": 75
+            }
+          ]
+        }
+      },
+      "name": "Decision Logic",
+      "type": "n8n-nodes-base.if",
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetName": "Candidates",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Score": "={{ $json.score }}",
+            "Role Fit": "={{ $json.role_fit }}",
+            "Summary": "={{ $json.summary }}",
+            "Status": "={{ $json.recommended_action === 'shortlist' ? 'shortlisted' : 'rejected' }}",
+            "Timestamp": "={{ new Date().toISOString() }}"
+          }
+        }
+      },
+      "name": "Store in Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "to": "={{ $json.email }}",
+        "subject": "={{ $json.recommended_action === 'shortlist' ? 'Interview Invitation - AI Hiring' : 'Application Update' }}",
+        "html": "={{ $json.recommended_action === 'shortlist' ? '<h1>Congratulations!</h1><p>You have been shortlisted for the next round.</p>' : '<h1>Thank you for applying</h1><p>We appreciate your interest but...' }}"
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [1250, 400]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.summary }}",
+        "voice": "alloy",
+        "options": {}
+      },
+      "name": "Text to Speech",
+      "type": "n8n-nodes-base.openAi",
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.audio_url }}",
+        "options": {}
+      },
+      "name": "Store Audio",
+      "type": "n8n-nodes-base.storage",
+      "position": [1650, 300]
+    }
+  ]
+}

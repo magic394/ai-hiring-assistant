@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test n8n Webhook</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Test AI Hiring Assistant</h2>
+        <form id="testForm">
+            <input type="text" id="name" placeholder="Candidate Name" value="Test Candidate" required>
+            <input type="email" id="email" placeholder="Email" value="test@example.com" required>
+            <input type="url" id="resume_url" placeholder="Resume URL" value="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" required>
+            <button type="submit">Submit Candidate</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'http://localhost:5678/webhook/candidate-submit';
+        
+        document.getElementById('testForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Sending to n8n...';
+            
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                resume_url: document.getElementById('resume_url').value
+            };
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                resultDiv.innerHTML = '✅ Success! Check n8n workflow execution.<br><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                resultDiv.innerHTML = '❌ Error: ' + error.message;
+            }
+        };
+    </script>
+</body>
+</html>

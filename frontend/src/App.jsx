@@ -106,7 +106,7 @@ function App() {
 
           <div className="mt-8 text-center text-gray-500 text-sm">
             <p>AI analyzes resume → Scores (0-100) → Shortlists → Sends email → Logs to Google Sheets</p>
-            <p className="mt-2">⚡ Built with n8n Cloud + React + Cloudflare Pages</p>
+            <p className="mt-2">⚡ Built with n8n Cloud + React + Cloudflare Pages ⚡</p>
           </div>
         </div>
       </div>
